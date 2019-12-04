@@ -6,6 +6,7 @@ import org.bukkit.event.Listener;
 
 import net.onima.onimaapi.event.CooldownEndEvent;
 import net.onima.onimaapi.event.CooldownStopEvent;
+import net.onima.onimaapi.rank.OnimaPerm;
 import net.onima.onimaapi.utils.Methods;
 import net.onima.onimaboard.board.Nametag;
 import net.onima.onimaboard.players.BoardPlayer;
@@ -18,13 +19,24 @@ public class ArmorClassListener implements Listener {
 	public void onArcherMark(ArcherTagPlayerEvent event) {
 		FPlayer fPlayer = event.getFPlayerTagged();
 		Player player = fPlayer.getApiPlayer().toPlayer();
+		boolean disguised = fPlayer.getApiPlayer().getDisguiseManager().isDisguised();
 		
-		if (event.getMark() > 1)
+		if (event.getMark() > 1) {
 			Methods.getOnlinePlayers(null).parallelStream()
-			.forEach(updater -> BoardPlayer.getPlayer(updater).getBoard().setNameTag(Nametag.ARCHER_TAG_2, player));
-		else
+			.forEach(updater -> {
+				if (disguised && !OnimaPerm.ONIMAAPI_DISGUISE_COMMAND_LIST.has(updater))
+					BoardPlayer.getPlayer(updater).getBoard().setNameTag(Nametag.ARCHER_TAG_2, player);
+				else if (!disguised)
+					BoardPlayer.getPlayer(updater).getBoard().setNameTag(Nametag.ARCHER_TAG_2, player);
+			});
+		} else
 			Methods.getOnlinePlayers(null).parallelStream()
-			.forEach(updater -> BoardPlayer.getPlayer(updater).getBoard().setNameTag(Nametag.ARCHER_TAG_1, player));
+			.forEach(updater -> {
+				if (disguised && !OnimaPerm.ONIMAAPI_DISGUISE_COMMAND_LIST.has(updater))
+					BoardPlayer.getPlayer(updater).getBoard().setNameTag(Nametag.ARCHER_TAG_2, player);
+				else if (!disguised)
+					BoardPlayer.getPlayer(updater).getBoard().setNameTag(Nametag.ARCHER_TAG_2, player);
+			});
 	}
 	
 	 @EventHandler

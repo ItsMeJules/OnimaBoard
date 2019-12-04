@@ -23,7 +23,6 @@ net\onima\onimaboard\board\Board.class
 net\onima\onimaboard\command\SidebarCommand.class
 net\onima\onimaboard\tab\template\NoFactionFactionListTemplate.class
 net\onima\onimaboard\board\Board$BoardLine.class
-net\onima\onimaboard\listeners\PlayerSetupListener.class
 net\onima\onimaboard\tab\Tab$TabEntry.class
 net\onima\onimaboard\tab\utils\TabTemplate.class
 net\onima\onimaboard\command\TabCommand.class
