@@ -1,0 +1,17 @@
+name: OnimaBoard
+author: Jestiz
+main: net.onima.onimaboard.OnimaBoard
+version: 1.0
+description: Board
+depend: [OnimaAPI, OnimaFaction, OnimaGames]
+
+commands:
+  tab:
+    description: Permet de changer de tab.
+    permission: onimaboard.tab.command
+  sidebar:
+    description: Permet d'activer/désactiver le scoreboard.
+    permission: onimaboard.sidebar.command
+  staffboard:
+    description: Permet d'activer/désactiver le staff board.
+    permission: onimaboard.staffboard.command
