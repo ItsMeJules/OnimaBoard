@@ -38,8 +38,19 @@ public class FactionListeners implements Listener {
 	public void onFactionDisband(FactionDisbandEvent event) {
 		for (FPlayer fPlayer : event.getFaction().getOnlineMembers(null)) {
 			BoardPlayer boardPlayer = BoardPlayer.getPlayer(fPlayer.getApiPlayer().getUUID());
+			boolean hasPerm = OnimaPerm.ONIMAAPI_DISGUISE_COMMAND_LIST.has(fPlayer.getApiPlayer().toPlayer());
 			
-			boardPlayer.getBoard().setNameTag(Nametag.ENEMY, Methods.getOnlinePlayers(null));
+			boardPlayer.getBoard().setNameTag(Nametag.ENEMY, Methods.getOnlinePlayers(null).stream().filter(online -> {
+				boolean disguised = APIPlayer.getPlayer(online).getDisguiseManager().isDisguised();
+				
+				if (disguised && !hasPerm)
+					return true;
+				else if (!disguised)
+					return true;
+				else
+					return false;
+				
+			}).collect(Collectors.toList()));
 			boardPlayer.setTab(TabType.NO_FACTION_SERV_INFO);
 		}
 	}
@@ -102,9 +113,9 @@ public class FactionListeners implements Listener {
 				else if (!disguised)
 					BoardPlayer.getPlayer(factionPlayer.getUniqueId()).getBoard().setNameTag(Nametag.FACTION, player);
 				
-				if (playerDisguised && hasPerm)
+				if (playerDisguised && !hasPerm)
 					board.setNameTag(Nametag.FACTION, factionPlayer);
-				else if (!disguised)
+				else if (!playerDisguised)
 					board.setNameTag(Nametag.FACTION, factionPlayer);
 			});
 			
@@ -118,9 +129,9 @@ public class FactionListeners implements Listener {
 					else if (!disguised)
 						BoardPlayer.getPlayer(factionPlayer.getUniqueId()).getBoard().setNameTag(Nametag.ALLY, player);
 					
-					if (playerDisguised && hasPerm)
+					if (playerDisguised && !hasPerm)
 						board.setNameTag(Nametag.ALLY, factionPlayer);
-					else if (!disguised)
+					else if (!playerDisguised)
 						board.setNameTag(Nametag.ALLY, factionPlayer);
 				});
 			
@@ -134,9 +145,14 @@ public class FactionListeners implements Listener {
 		 
 		 if (offline.isOnline()) {
 			 Player player = (Player) offline;
-			 boolean disguised = APIPlayer.getPlayer(player).getDisguiseManager().isDisguised();
+			 FPlayer focusedFPlayer = FPlayer.getPlayer(player);
 			 
-			 ((PlayerFaction) event.getFaction()).getOnlineMembers(null).parallelStream().forEach(updater -> {
+			 if (focusedFPlayer.getArcherTag() > 0)
+				 return;
+			 
+			 boolean disguised = focusedFPlayer.getApiPlayer().getDisguiseManager().isDisguised();
+			 
+			 ((PlayerFaction) event.getFaction()).getOnlineMembers(null).stream().forEach(updater -> {
 				 Player factionPlayer = updater.getApiPlayer().toPlayer();
 				 
 				 if (disguised && !OnimaPerm.ONIMAAPI_DISGUISE_COMMAND_LIST.has(factionPlayer))
@@ -152,8 +168,24 @@ public class FactionListeners implements Listener {
 	 public void onFactionUnfocus(FactionUnfocusEvent event) {
 		 OfflinePlayer offline = event.getFocused();
 		 
-		 if (offline.isOnline())
-			 BoardPlayer.getPlayer((Player) offline).getBoard().initNametag();
+		 if (offline.isOnline()) {
+			 Player player = (Player) offline;
+			 FPlayer focusedFPlayer = FPlayer.getPlayer(player);
+			 
+			 if (focusedFPlayer.getArcherTag() > 0)
+				 return;
+			 
+			 boolean disguised = focusedFPlayer.getApiPlayer().getDisguiseManager().isDisguised();
+			 
+			 for (FPlayer fPlayer : ((PlayerFaction) event.getFaction()).getOnlineMembers(null)) {
+				 Player factionPlayer = fPlayer.getApiPlayer().toPlayer();
+				 
+				 if (disguised && !OnimaPerm.ONIMAAPI_DISGUISE_COMMAND_LIST.has(factionPlayer))
+					 BoardPlayer.getPlayer(factionPlayer.getUniqueId()).getBoard().setNameTag(Nametag.ENEMY, player);
+				 else if (!disguised)
+					 BoardPlayer.getPlayer(factionPlayer.getUniqueId()).getBoard().setNameTag(Nametag.ENEMY, player);
+			 }
+		 }
 	 
 	 }
 	

@@ -16,6 +16,7 @@ import org.bukkit.scoreboard.Team;
 
 import com.google.common.base.Preconditions;
 
+import net.onima.onimaapi.rank.OnimaPerm;
 import net.onima.onimaapi.utils.Methods;
 import net.onima.onimaboard.board.utils.ScoreboardTemplate;
 import net.onima.onimaboard.players.BoardPlayer;
@@ -26,7 +27,7 @@ import net.onima.onimafaction.players.FPlayer;
 /**
  * This class is handling the scoreboard and the player's name. Each scorebaord is unique to each online player on the server.
  */
-public class Board {
+public class Board { //TODO Ajouter des teams pour colorer les noms meme s'il est déguisé (exemple [Déguisé] §cGrosPD ou §cGrosPD [Déguisé]).
 
 	private List<BoardLine> lines;
 	private Scoreboard scoreboard;
@@ -406,7 +407,9 @@ public class Board {
 	 * This method inits all the nametags for all online players.
 	 */
 	public void initNametag() {
-		PlayerFaction faction = FPlayer.getPlayer(player).getFaction();
+		FPlayer fPlayer = FPlayer.getPlayer(player);
+		PlayerFaction faction = fPlayer.getFaction();
+		boolean disguised = fPlayer.getApiPlayer().getDisguiseManager().isDisguised();
 		
 		for (Player player : Bukkit.getOnlinePlayers()) {
 			if (player.equals(this.player)) continue;
@@ -417,7 +420,7 @@ public class Board {
 			if (otherFaction == null || faction == null || otherFaction.getRelation(faction) == Relation.ENEMY) {
 				setNameTag(Nametag.ENEMY, player);
 				boardPlayer.getBoard().setNameTag(Nametag.ENEMY, this.player);
-			} else if(otherFaction.getName().equalsIgnoreCase(faction.getName())) {
+			} else if(otherFaction.getRelation(faction) == Relation.MEMBER) {
 				setNameTag(Nametag.FACTION, player);
 				boardPlayer.getBoard().setNameTag(Nametag.FACTION, this.player);
 			} else if(otherFaction.getRelation(faction) == Relation.ALLY) {
@@ -425,10 +428,14 @@ public class Board {
 				boardPlayer.getBoard().setNameTag(Nametag.ALLY, this.player);
 			}
 			
-			if (otherFaction != null && otherFaction.getFocused() != null && otherFaction.getFocused().equals(this.player.getPlayer())) {
-				setNameTag(Nametag.FOCUS, player);
+			if (otherFaction != null && otherFaction.getFocused() != null && otherFaction.getFocused().equals(this.player.getPlayer()))
 				boardPlayer.getBoard().setNameTag(Nametag.FOCUS, this.player);
-			}
+			
+			if (faction != null && faction.getFocused() != null && faction.getFocused().equals(player))
+				setNameTag(Nametag.FOCUS, player);
+			
+			if (disguised && OnimaPerm.ONIMAAPI_DISGUISE_COMMAND_LIST.has(player))
+				boardPlayer.getBoard().setNameTag(Nametag.DISGUISED_ADMIN, this.player);
 			
 		}
 		

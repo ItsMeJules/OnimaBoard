@@ -43,11 +43,11 @@ public class BoardPlayer extends OfflineBoardPlayer {
 	}
 	
 	public void loadLogin() {
+		setBoard(new OnimaBoardTemplate());
 	}
 	
 	public void loadJoin() {
 		Bukkit.getScheduler().runTask(OnimaBoard.getInstance(), () -> {
-			setBoard(new OnimaBoardTemplate());
 			board.onJoin();
 			
 			if (fPlayer.hasFaction())
