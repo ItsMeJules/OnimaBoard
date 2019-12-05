@@ -1,6 +1,6 @@
 package net.onima.onimaboard.task;
 
-import java.util.List;
+import java.util.Iterator;
 
 import net.onima.onimaapi.utils.TaskPerEntry;
 import net.onima.onimaboard.OnimaBoard;
@@ -17,8 +17,9 @@ public class ScoreboardEntryTask extends TaskPerEntry<BoardPlayer> {
 	}
 
 	@Override
-	public void run(List<BoardPlayer> list) {
-		for (BoardPlayer boardPlayer : list) {
+	public void run(Iterator<BoardPlayer> iterator) {
+		while (iterator.hasNext()) {
+			BoardPlayer boardPlayer = iterator.next();
 			Board board = boardPlayer.getBoard();
 			
 			if (board != null && boardPlayer.hasBoardToggled()) {

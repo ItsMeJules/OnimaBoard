@@ -1,5 +1,8 @@
 package net.onima.onimaboard.listeners;
 
+import java.util.stream.Collectors;
+
+import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -24,7 +27,7 @@ public class TagDisguiseListener implements Listener {
 	
 	@EventHandler
 	public void onUndisguise(PlayerUndisguiseEvent event) {
-		BoardPlayer.getPlayer(event.getPlayer()).getBoard().initNametag();
+		BoardPlayer.getPlayer(event.getPlayer()).getBoard().initNametag(Bukkit.getOnlinePlayers().stream().filter(player -> OnimaPerm.ONIMAAPI_DISGUISE_COMMAND_LIST.has(player)).collect(Collectors.toList()));
 	}
 	
 

@@ -4,6 +4,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 
+import net.onima.onimaapi.cooldown.utils.Cooldown;
 import net.onima.onimaapi.event.CooldownEndEvent;
 import net.onima.onimaapi.event.CooldownStopEvent;
 import net.onima.onimaapi.players.OfflineAPIPlayer;
@@ -11,6 +12,7 @@ import net.onima.onimaapi.rank.OnimaPerm;
 import net.onima.onimaapi.utils.Methods;
 import net.onima.onimaboard.board.Nametag;
 import net.onima.onimaboard.players.BoardPlayer;
+import net.onima.onimafaction.cooldowns.ArcherMarkCooldown;
 import net.onima.onimafaction.events.armorclass.archer.ArcherTagPlayerEvent;
 import net.onima.onimafaction.players.FPlayer;
 
@@ -47,10 +49,13 @@ public class ArmorClassListener implements Listener {
 	
 	 @EventHandler
 	 public void onArcherMarkEnd(CooldownEndEvent event) {
+		 if (event.getCooldown().getId() != Cooldown.getCooldown(ArcherMarkCooldown.class).getId())
+			 return;
+		 
 		 OfflineAPIPlayer offline = event.getOfflineAPIPlayer();
 		 
 		 if (offline.isOnline()) {
-			 FPlayer fPlayer = FPlayer.getPlayer((Player) offline);
+			 FPlayer fPlayer = FPlayer.getPlayer(offline.getUUID());
 			 Player player = fPlayer.getApiPlayer().toPlayer();
 			 boolean disguised = fPlayer.getApiPlayer().getDisguiseManager().isDisguised();
 			 
@@ -69,6 +74,9 @@ public class ArmorClassListener implements Listener {
 	 
 	 @EventHandler
 	 public void onArcherMarkStop(CooldownStopEvent event) {
+		 if (event.getCooldown().getId() != Cooldown.getCooldown(ArcherMarkCooldown.class).getId())
+			 return;
+		 
 		 onArcherMarkEnd(event);
 	 }
 

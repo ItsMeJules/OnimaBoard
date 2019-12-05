@@ -4,9 +4,9 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
+import java.util.Objects;
 
 import org.apache.commons.lang.StringUtils;
-import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
 import org.bukkit.scoreboard.DisplaySlot;
@@ -78,7 +78,7 @@ public class Board { //TODO Ajouter des teams pour colorer les noms meme s'il es
 	 */
 	public void onJoin() {
 		player.setScoreboard(scoreboard);
-		initNametag();
+		initNametag(Methods.getOnlinePlayers(player));
 		addFactionMate(player);
 	}
 	
@@ -209,37 +209,41 @@ public class Board { //TODO Ajouter des teams pour colorer les noms meme s'il es
 		lines.clear();
 	}
 	
-	public void remove(int index) {
+	public void remove(int index) { //TODO essayer de changer avec juste des ints (pas d'opératins lourdes).
 		String name = getNameForIndex(index);
 		scoreboard.resetScores(name);
-		getOrCreateTeam(ChatColor.stripColor(StringUtils.left(tag, 14))+ index, index).unregister();
+		getOrCreateTeam(ChatColor.stripColor(StringUtils.left(tag, 14)) + index, index).unregister();
 	}
 	
 	public void update() {
 		int i;
 		for(i = 0; i < lines.size(); i++) {
 			//Getting the team "Mc-Market i"
-			Team team = getOrCreateTeam(ChatColor.stripColor(StringUtils.left(tag, 14))+i, i);
-			BoardLine str = lines.get(lines.size()-i-1);
+			Team team = getOrCreateTeam(ChatColor.stripColor(StringUtils.left(tag, 14)) + i, i);
+			BoardLine str = lines.get(lines.size() - i - 1);
 			
 			team.setPrefix(str.getLeft());
 			team.setSuffix(str.getRight());
 			//Showing the team
-			objective.getScore(getNameForIndex(i)).setScore(i+1);
+			objective.getScore(getNameForIndex(i)).setScore(i + 1);
 		}
 		
-		if(lastSentCount != -1) {
+		if (lastSentCount != -1) {
 			i = lines.size();
 			
-			for(int j = 0; j < lastSentCount - i; j++)
-				remove(i+j);
+			for (int j = 0; j < lastSentCount - i; j++)
+				remove(i + j);
 		}
+		
 		lastSentCount = lines.size();
 	}
 	
 	private Objective getOrCreateObjective(String objective) {
 		Objective obj = scoreboard.getObjective("gueden");
-		if(obj == null)	obj = scoreboard.registerNewObjective("gueden", "dummy");
+		
+		if (obj == null)
+			obj = scoreboard.registerNewObjective("onima", "dummy");
+		
 		obj.setDisplayName(objective);
 	
 		return obj;
@@ -247,10 +251,12 @@ public class Board { //TODO Ajouter des teams pour colorer les noms meme s'il es
 	
 	private Team getOrCreateTeam(String team, int i) {
 		Team sTeam = scoreboard.getTeam(team);
-		if(sTeam == null) {
+		
+		if (Objects.isNull(sTeam)) {
 			sTeam = scoreboard.registerNewTeam(team);
 			sTeam.addEntry(getNameForIndex(i));
 		}
+		
 		return sTeam;
 	}
 	
@@ -406,12 +412,12 @@ public class Board { //TODO Ajouter des teams pour colorer les noms meme s'il es
 	/**
 	 * This method inits all the nametags for all online players.
 	 */
-	public void initNametag() {
+	public void initNametag(Collection<Player> players) {
 		FPlayer fPlayer = FPlayer.getPlayer(player);
 		PlayerFaction faction = fPlayer.getFaction();
 		boolean disguised = fPlayer.getApiPlayer().getDisguiseManager().isDisguised();
 		
-		for (Player player : Bukkit.getOnlinePlayers()) {
+		for (Player player : players) {
 			if (player.equals(this.player)) continue;
 			
 			BoardPlayer boardPlayer = BoardPlayer.getPlayer(player);

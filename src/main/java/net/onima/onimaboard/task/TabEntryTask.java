@@ -1,6 +1,6 @@
 package net.onima.onimaboard.task;
 
-import java.util.List;
+import java.util.Iterator;
 
 import net.onima.onimaapi.utils.TaskPerEntry;
 import net.onima.onimaboard.OnimaBoard;
@@ -17,10 +17,9 @@ public class TabEntryTask extends TaskPerEntry<BoardPlayer> {
 	}
 
 	@Override
-	public void run(List<BoardPlayer> list) {
-		for (BoardPlayer boardPlayer : list) {
-			if (!boardPlayer.getApiPlayer().isLoaded()) continue;
-			
+	public void run(Iterator<BoardPlayer> iterator) {
+		while (iterator.hasNext()) {
+			BoardPlayer boardPlayer = iterator.next();
 			Tab tab = boardPlayer.getTab();
 			
 			if (tab != null) {
@@ -29,8 +28,8 @@ public class TabEntryTask extends TaskPerEntry<BoardPlayer> {
 				if (template != null)
 					template.fill(tab);
 			}
+			
 		}
-		
 	}
 	
 	public static void init(OnimaBoard plugin) {
