@@ -114,7 +114,8 @@ public class FactionServerInfoTemplate implements TabTemplate {
 		
 		tab.set(1, 2, "§d" + faction.getName());
 		for (int i = 0; i < members.size(); i++) {
-			if ((i + 3) >= 20) break;
+			if ((i + 3) >= 20)
+				break;
 			
 			FPlayer member = members.get(i);
 			

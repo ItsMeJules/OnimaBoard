@@ -118,8 +118,15 @@ public class BoardPlayer extends OfflineBoardPlayer {
 	public void remove() {
 		super.remove();
 		players.remove(apiPlayer.getUUID());
-		ScoreboardEntryTask.get().remove(this);
-		TabEntryTask.get().remove(this);
+		ScoreboardEntryTask.get().safeRemove(this);
+		TabEntryTask.get().safeRemove(this);
+		
+		if (fPlayer.hasFaction()) {
+			for (FPlayer member : fPlayer.getFaction().getOnlineMembers(null)) {
+				for (int y = 3; y < 20; y++)
+					getPlayer(member.getApiPlayer().getUUID()).tab.set(1, y, "");
+			}
+		}
 	}
 	
 	public static BoardPlayer getPlayer(UUID uuid) {

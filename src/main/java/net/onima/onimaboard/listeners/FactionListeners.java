@@ -24,6 +24,7 @@ import net.onima.onimafaction.events.FactionPlayerLeaveEvent.LeaveReason;
 import net.onima.onimafaction.events.FactionUnfocusEvent;
 import net.onima.onimafaction.faction.Faction;
 import net.onima.onimafaction.faction.PlayerFaction;
+import net.onima.onimafaction.faction.struct.Relation;
 import net.onima.onimafaction.players.FPlayer;
 import net.onima.onimafaction.players.OfflineFPlayer;
 
@@ -73,7 +74,10 @@ public class FactionListeners implements Listener {
 			toUpdate.parallelStream().forEach(updater -> {
 				BoardPlayer lol = BoardPlayer.getPlayer(updater.getUniqueId());
 				
-				lol.getTab().empty();
+				if (faction.getRelation(lol.getFPlayer().getFaction()) == Relation.MEMBER) {
+					for (int y = 3; y < 20; y++)
+						lol.getTab().set(1, y, "");
+				}
 				
 				if (disguised && !OnimaPerm.ONIMAAPI_DISGUISE_COMMAND_LIST.has(updater))
 					lol.getBoard().setNameTag(Nametag.ENEMY, player);
@@ -188,5 +192,5 @@ public class FactionListeners implements Listener {
 		 }
 	 
 	 }
-	
+	 
 }

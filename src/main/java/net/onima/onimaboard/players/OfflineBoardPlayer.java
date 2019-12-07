@@ -13,8 +13,8 @@ import net.onima.onimaapi.OnimaAPI;
 import net.onima.onimaapi.caching.UUIDCache;
 import net.onima.onimaapi.event.mongo.AbstractPlayerLoadEvent;
 import net.onima.onimaapi.mongo.api.result.MongoQueryResult;
+import net.onima.onimaapi.mongo.saver.NoSQLSaver;
 import net.onima.onimaapi.players.OfflineAPIPlayer;
-import net.onima.onimaapi.saver.mongo.NoSQLSaver;
 import net.onima.onimaapi.utils.callbacks.VoidCallback;
 import net.onima.onimafaction.players.OfflineFPlayer;
 
@@ -108,6 +108,10 @@ public class OfflineBoardPlayer implements NoSQLSaver {
 	@Deprecated
 	@Override
 	public Document getDocument(Object... objects) {return null;}
+	
+	@Deprecated
+	@Override
+	public boolean shouldDelete() {return false;}
 	
 	public static void getPlayer(UUID uuid, VoidCallback<OfflineBoardPlayer> callback) {
 		if (!offlinePlayers.containsKey(uuid)) {
