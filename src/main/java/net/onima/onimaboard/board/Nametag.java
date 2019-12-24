@@ -10,7 +10,8 @@ public enum Nametag {
 	FOCUS,
 	ARCHER_TAG_1,
 	ARCHER_TAG_2,
-	DISGUISED_ADMIN;
+	DISGUISED_ADMIN,
+	INVISIBLE_ADMIN;
 	
 	public static Nametag fromRelation(Relation relation) {
 		switch (relation) {

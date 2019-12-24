@@ -9,6 +9,7 @@ import net.onima.onimaboard.manager.CommandManager;
 import net.onima.onimaboard.manager.ListenerManager;
 import net.onima.onimaboard.task.ScoreboardEntryTask;
 import net.onima.onimaboard.task.TabEntryTask;
+import net.onima.onimaboard.utils.InvisibilityHandler;
 
 public class OnimaBoard extends JavaPlugin {
 	
@@ -31,6 +32,8 @@ public class OnimaBoard extends JavaPlugin {
 	public void registerManager() {
 		ScoreboardEntryTask.init(this);
 		TabEntryTask.init(this);
+		
+		InvisibilityHandler.hook(this);
 		
 		new ListenerManager(this).registerListener();
 		new CommandManager(this).registerCommands();

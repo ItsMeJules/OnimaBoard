@@ -19,24 +19,37 @@ import com.google.common.base.Preconditions;
 import net.onima.onimaapi.rank.OnimaPerm;
 import net.onima.onimaapi.utils.Methods;
 import net.onima.onimaboard.board.utils.ScoreboardTemplate;
+import net.onima.onimaboard.nametag.Nametag;
+import net.onima.onimaboard.nametag.NametagType;
+import net.onima.onimaboard.nametag.type.AllyNametag;
+import net.onima.onimaboard.nametag.type.ArcherTagNametag1;
+import net.onima.onimaboard.nametag.type.ArcherTagNametag2;
+import net.onima.onimaboard.nametag.type.EnemyNametag;
+import net.onima.onimaboard.nametag.type.FactionNametag;
+import net.onima.onimaboard.nametag.type.FocusNametag;
+import net.onima.onimaboard.nametag.type.staff.DisguiseAllyNametag;
+import net.onima.onimaboard.nametag.type.staff.DisguiseArcherTagNametag1;
+import net.onima.onimaboard.nametag.type.staff.DisguiseArcherTagNametag2;
+import net.onima.onimaboard.nametag.type.staff.DisguiseEnemyNametag;
+import net.onima.onimaboard.nametag.type.staff.DisguiseFactionNametag;
+import net.onima.onimaboard.nametag.type.staff.DisguiseFocusNametag;
 import net.onima.onimaboard.players.BoardPlayer;
-import net.onima.onimafaction.faction.PlayerFaction;
-import net.onima.onimafaction.faction.struct.Relation;
-import net.onima.onimafaction.players.FPlayer;
 
 /**
  * This class is handling the scoreboard and the player's name. Each scorebaord is unique to each online player on the server.
  */
-public class Board { //TODO Ajouter des teams pour colorer les noms meme s'il est déguisé (exemple [Déguisé] §cGrosPD ou §cGrosPD [Déguisé]).
+public class Board {
 
 	private List<BoardLine> lines;
 	private Scoreboard scoreboard;
 	private Objective objective;
 	private String tag;
 	private int lastSentCount;
-	private Player player;
-	private Team faction, allies, enemies, archerTagged1, archerTagged2, focus, disguised;
+	private BoardPlayer player;
 	private ScoreboardTemplate scoreboardTemplate;
+	private Nametag ally, archerTag1, archerTag2, enemy, faction, focus;
+	private Nametag disguiseAlly, disguiseArcherTag1, disguiseArcherTag2, disguiseEnemy, disguiseFaction, disguiseFocus;
+//	private net.minecraft.server.v1_7_R4.Scoreboard nmsBoard;
 	
 	{
 		this.lines = new ArrayList<>();
@@ -52,133 +65,48 @@ public class Board { //TODO Ajouter des teams pour colorer les noms meme s'il es
 	 * @param title - The scoreboard's title
 	 * @param profile - The profile to set this board.
 	 */
-	public Board(Scoreboard scoreboard, ScoreboardTemplate scoreboardTemplate, Player player) {
+	public Board(Scoreboard scoreboard, ScoreboardTemplate scoreboardTemplate, BoardPlayer player) {
 		Preconditions.checkState(scoreboardTemplate.getTitle().length() < 33, "The title is " + (scoreboardTemplate.getTitle().length() - 32) + " character(s) too long.");
 		this.scoreboard = scoreboard;
 		this.tag = Methods.colors(scoreboardTemplate.getTitle());
 		this.scoreboardTemplate = scoreboardTemplate;
 		this.player = player;
 		
-		(this.objective = getOrCreateObjective(tag)).setDisplaySlot(DisplaySlot.SIDEBAR);
+		(objective = getOrCreateObjective(tag)).setDisplaySlot(DisplaySlot.SIDEBAR);
 		
-		this.faction = scoreboard.registerNewTeam("faction");
-		this.faction.setPrefix("§2");
-		this.faction.setCanSeeFriendlyInvisibles(true);
+		ally = new AllyNametag();
+		archerTag1 = new ArcherTagNametag1();
+		archerTag2 = new ArcherTagNametag2();
+		enemy = new EnemyNametag();
+		faction = new FactionNametag(player.getApiPlayer().toPlayer());
+		focus = new FocusNametag();
 		
-		(this.allies = scoreboard.registerNewTeam("allies")).setPrefix("§9");
-		(this.enemies = scoreboard.registerNewTeam("enemies")).setPrefix("§e");
-		(this.archerTagged1 = scoreboard.registerNewTeam("archer1")).setPrefix("§c");
-		(this.archerTagged2 = scoreboard.registerNewTeam("archer2")).setPrefix("§4");
-		(this.focus = scoreboard.registerNewTeam("focus")).setPrefix("§d");
-		(this.disguised = scoreboard.registerNewTeam("disguised")).setPrefix("§f[§eDéguisé§f] ");
+		disguiseAlly = new DisguiseAllyNametag();
+		disguiseArcherTag1 = new DisguiseArcherTagNametag1();
+		disguiseArcherTag2 = new DisguiseArcherTagNametag2();
+		disguiseEnemy = new DisguiseEnemyNametag();
+		disguiseFaction = new DisguiseFactionNametag();
+		disguiseFocus = new DisguiseFocusNametag();
+		
+		ally.initInScoreboard(scoreboard);
+		archerTag1.initInScoreboard(scoreboard);
+		archerTag2.initInScoreboard(scoreboard);
+		enemy.initInScoreboard(scoreboard);
+		faction.initInScoreboard(scoreboard);
+		focus.initInScoreboard(scoreboard);
+		
+		disguiseAlly.initInScoreboard(scoreboard);
+		disguiseArcherTag1.initInScoreboard(scoreboard);
+		disguiseArcherTag2.initInScoreboard(scoreboard);
+		disguiseEnemy.initInScoreboard(scoreboard);
+		disguiseFaction.initInScoreboard(scoreboard);
+		disguiseFocus.initInScoreboard(scoreboard);
 	}
 	
-	/**
-	 * This method inits the every online players nametag and sets the current player nametag on faction.
-	 */
 	public void onJoin() {
-		player.setScoreboard(scoreboard);
-		initNametag(Methods.getOnlinePlayers(player));
-		addFactionMate(player);
+		player.getApiPlayer().toPlayer().setScoreboard(scoreboard);
+		initNametag(Methods.getOnlinePlayers(player.getApiPlayer().toPlayer()));
 	}
-	
-//	public void add(String text) {
-//		Iterator<String> iterator = Splitter.fixedLength(16).split(text).iterator();
-//		BoardLine boardLine = new BoardLine(iterator.next());
-//		
-//		while (iterator.hasNext()) {
-//			String next = iterator.next();
-//			String lastSet = boardLine.getLastSet();
-//			
-//			if (lastSet.endsWith("§")) {
-//				boardLine.shrinkLastField(1);
-//				next = "§" + next;
-//			}
-//			
-//			boardLine.addText(StringUtils.left(ChatColor.getLastColors(lastSet) + next, 16));
-//		}
-//		
-//		if (boardLine.getSecond() == null)
-//			boardLine.addText(getNameForIndex(lines.size()));
-//		
-//		lines.add(boardLine);
-//	}
-//	
-//	/**
-//	 * This method clears all the scoreboard's lines.
-//	 */
-//	public void reset() {
-//		lines.clear();
-//	}
-//	
-//	/**
-//	 * This method removes a scoreboard line at the given index.
-//	 * 
-//	 * @param index - Index to remove the line.
-//	 */
-//	public void removeTeam(int index) {
-//		String name = getNameForIndex(index);
-//		
-//		scoreboard.resetScores(name);
-//		Team team = getOrCreateTeam(ChatColor.stripColor(StringUtils.left(tag, 14)) + index, index);
-//		
-//		team.unregister();
-//	}
-//	
-//	public void update() {
-//		int i;
-//		
-//		for (i = 0; i < lines.size(); i++) {
-//			Team team = getOrCreateTeam(ChatColor.stripColor(StringUtils.left(tag, 14)) + i);
-//			BoardLine boardLine = lines.get(lines.size() - i - 1);
-//			
-//			team.setPrefix(boardLine.getFirst());
-//			team.addEntry(boardLine.getSecond());
-//			team.setSuffix(boardLine.getThird());
-//			
-//			objective.getScore(boardLine.getSecond()).setScore(i + 1);
-//			
-////			if (boardLine.hasThird()) {
-////				team.addEntry(boardLine.getSecond());
-////				team.setSuffix(boardLine.getThird());
-////				objective.getScore(boardLine.getSecond()).setScore(i + 1);
-////			} else {
-////				String entry = getNameForIndex(i);
-////				team.addEntry(getNameForIndex(i));
-////				team.setSuffix(boardLine.getSecond());
-////				objective.getScore(getNameForIndex(i)).setScore(i + 1);
-////			}
-//		}
-//		
-//		if (lastSentCount != -1) {
-//			i = lines.size();
-//			
-//			for (int j = 0; j < lastSentCount - i; j++)
-//				removeTeam(i + j);
-//		}
-//		lastSentCount = lines.size();
-//	}
-//	
-//	private Objective getOrCreateObjective(String objective) {
-//		Objective obj = scoreboard.getObjective("onima");
-//		
-//		if (obj == null)
-//			obj = scoreboard.registerNewObjective("onima", "dummy");
-//		
-//		obj.setDisplayName(objective);
-//	
-//		return obj;
-//	}
-//	
-//	private Team getOrCreateTeam(String team) {
-//		Team sTeam = scoreboard.getTeam(team);
-//		
-//		if (sTeam == null)
-//			sTeam = scoreboard.registerNewTeam(team);
-//		
-//		return sTeam;
-//	}
-//	
 	
 	public void add(String text) {
 		BoardLine line;
@@ -217,10 +145,15 @@ public class Board { //TODO Ajouter des teams pour colorer les noms meme s'il es
 	
 	public void update() {
 		int i;
-		for(i = 0; i < lines.size(); i++) {
+		for (i = 0; i < lines.size(); i++) {
 			//Getting the team "Mc-Market i"
 			Team team = getOrCreateTeam(ChatColor.stripColor(StringUtils.left(tag, 14)) + i, i);
-			BoardLine str = lines.get(lines.size() - i - 1);
+			int pos = lines.size() - i - 1;
+			
+			if (pos < 0)
+				continue;
+			
+			BoardLine str = lines.get(pos);
 			
 			team.setPrefix(str.getLeft());
 			team.setSuffix(str.getRight());
@@ -239,7 +172,7 @@ public class Board { //TODO Ajouter des teams pour colorer les noms meme s'il es
 	}
 	
 	private Objective getOrCreateObjective(String objective) {
-		Objective obj = scoreboard.getObjective("gueden");
+		Objective obj = scoreboard.getObjective("onima");
 		
 		if (obj == null)
 			obj = scoreboard.registerNewObjective("onima", "dummy");
@@ -271,74 +204,39 @@ public class Board { //TODO Ajouter des teams pour colorer les noms meme s'il es
 		return scoreboard;
 	}
 	
-	public Player getPlayer() {
+	public BoardPlayer getPlayer() {
 		return player;
 	}
 	
-	private void checkTeam(Player player) {
-		removeFactionMate(player);
-		removeAllyMate(player);
-		removeEnemyPrick(player);
-		removeArcherVictim(player, 1);
-		removeArcherVictim(player, 2);
-		removeSneakyDisguised(player);
-	}
-	
-	private void addFactionMate(Player player) {
-		checkTeam(player);
-		faction.addPlayer(player);
-	}
-	
-	private void removeFactionMate(Player player) {
-		if(faction.getPlayers().contains(player)) faction.removePlayer(player);
-	}
-	
-	private void addAllyMate(Player player) {
-		checkTeam(player);
-		allies.addPlayer(player);
-	}
-	
-	private void removeAllyMate(Player player) {
-		if(allies.getPlayers().contains(player)) allies.removePlayer(player);
-	}
-	
-	private void addEnemyPrick(Player player) {
-		checkTeam(player);
-		enemies.addPlayer(player);
-	}
-	
-	private void addSneakyDisguised(Player player) {
-		checkTeam(player);
-		disguised.addPlayer(player);
-	}
-	
-	private void removeEnemyPrick(Player player) {
-		if(enemies.getPlayers().contains(player)) enemies.removePlayer(player);
-	}
-	
-	private void addArcherVictim(Player player, int mark) {
-		checkTeam(player);
-		if (mark == 1) 
-			archerTagged1.addPlayer(player);
-		else if (mark == 2)
-			archerTagged2.addPlayer(player);
-	}
-	
-	private void removeArcherVictim(Player player, int mark) {
-		if(mark == 1) 
-			if(archerTagged1.getPlayers().contains(player)) archerTagged1.removePlayer(player);
-		else if(mark == 2)
-			if(archerTagged2.getPlayers().contains(player)) archerTagged2.removePlayer(player);
-	}
-	
-	private void addFocusPlayer(Player player) {
-		checkTeam(player);
-		focus.addPlayer(player);
-	}
-	
-	private void removeSneakyDisguised(Player player) {
-		if (disguised.getPlayers().contains(player))
-			disguised.removePlayer(player);
+	public Nametag getNametag(NametagType type) {
+		switch (type) {
+		case ALLY:
+			return ally;
+		case ARCHER_TAG_1:
+			return archerTag1;
+		case ARCHER_TAG_2:
+			return archerTag2;
+		case ENEMY:
+			return enemy;
+		case FACTION:
+			return faction;
+		case FOCUS:
+			return focus;
+		case DISGUISED_ALL:
+			return disguiseAlly;
+		case DISGUISED_TAG_1:
+			return disguiseArcherTag1;
+		case DISGUISED_TAG_2:
+			return disguiseArcherTag2;
+		case DISGUISED_ENE:
+			return disguiseEnemy;
+		case DISGUISED_FAC:
+			return disguiseFaction;
+		case DISGUISED_FOC:
+			return disguiseFocus;
+		default:
+			return null;
+		}
 	}
 	
 	/**
@@ -347,8 +245,8 @@ public class Board { //TODO Ajouter des teams pour colorer les noms meme s'il es
 	 * @param nametag - {@link Nametag} to set.
 	 * @param player - Player to set the Nametag.
 	 */
-	public void setNameTag(Nametag nametag, Player player) {
-		setNameTag(nametag, Arrays.asList(player));
+	public void setNameTag(NametagType type, Player player) {
+		setNameTag(type, Arrays.asList(player));
 	}
 	
 	/**
@@ -357,36 +255,8 @@ public class Board { //TODO Ajouter des teams pour colorer les noms meme s'il es
 	 * @param nametag - {@link Nametag} to set.
 	 * @param players - A collection of players to set the Nametag.
 	 */
-	public void setNameTag(Nametag nametag, Collection<Player> players) {
-		for (Player player : players) {
-			if (this.player.equals(player)) return;
-			
-			switch (nametag) {
-			case ALLY:
-				addAllyMate(player);
-				break;
-			case ARCHER_TAG_1:
-				addArcherVictim(player, 1);
-				break;
-			case ARCHER_TAG_2:
-				addArcherVictim(player, 2);
-				break;
-			case ENEMY:
-				addEnemyPrick(player);
-				break;
-			case FACTION:
-				addFactionMate(player);
-				break;
-			case FOCUS:
-				addFocusPlayer(player);
-				break;
-			case DISGUISED_ADMIN:
-				addSneakyDisguised(player);
-				break;
-			default:
-				break;
-			}
-		}
+	public void setNameTag(NametagType type, Collection<Player> players) {
+		getNametag(type).show(players);
 	}
 	
 	/**
@@ -410,39 +280,32 @@ public class Board { //TODO Ajouter des teams pour colorer les noms meme s'il es
 	}
 	
 	/**
-	 * This method inits all the nametags for all online players.
+	 * This method inits all the nametags for the given players.
 	 */
 	public void initNametag(Collection<Player> players) {
-		FPlayer fPlayer = FPlayer.getPlayer(player);
-		PlayerFaction faction = fPlayer.getFaction();
-		boolean disguised = fPlayer.getApiPlayer().getDisguiseManager().isDisguised();
+		Player normalPlayer = player.getApiPlayer().toPlayer();
 		
 		for (Player player : players) {
-			if (player.equals(this.player)) continue;
+			if (player.getUniqueId().equals(normalPlayer.getUniqueId()))
+				continue;
 			
 			BoardPlayer boardPlayer = BoardPlayer.getPlayer(player);
-			PlayerFaction otherFaction = boardPlayer.getFPlayer().getFaction();
+			boolean testOthers1 = true, testOthers2 = true;
 			
-			if (otherFaction == null || faction == null || otherFaction.getRelation(faction) == Relation.ENEMY) {
-				setNameTag(Nametag.ENEMY, player);
-				boardPlayer.getBoard().setNameTag(Nametag.ENEMY, this.player);
-			} else if(otherFaction.getRelation(faction) == Relation.MEMBER) {
-				setNameTag(Nametag.FACTION, player);
-				boardPlayer.getBoard().setNameTag(Nametag.FACTION, this.player);
-			} else if(otherFaction.getRelation(faction) == Relation.ALLY) {
-				setNameTag(Nametag.ALLY, player);
-				boardPlayer.getBoard().setNameTag(Nametag.ALLY, this.player);
+			for (Nametag nametag : Nametag.getByPriority(this, OnimaPerm.ONIMAAPI_SEE_INVISIBLE.has(player))) {
+				if (testOthers1 && nametag.isApplicable(player, this.player)) {
+					nametag.show(player);
+					testOthers1 = false;
+				}
+				
+				if (testOthers2 && nametag.isApplicable(normalPlayer, boardPlayer)) {
+					boardPlayer.getBoard().getNametag(nametag.getType()).show(normalPlayer);
+					testOthers2 = false;
+				}
+				
+				if (!testOthers1 && !testOthers1)
+					break;
 			}
-			
-			if (otherFaction != null && otherFaction.getFocused() != null && otherFaction.getFocused().equals(this.player.getPlayer()))
-				boardPlayer.getBoard().setNameTag(Nametag.FOCUS, this.player);
-			
-			if (faction != null && faction.getFocused() != null && faction.getFocused().equals(player))
-				setNameTag(Nametag.FOCUS, player);
-			
-			if (disguised && OnimaPerm.ONIMAAPI_DISGUISE_COMMAND_LIST.has(player))
-				boardPlayer.getBoard().setNameTag(Nametag.DISGUISED_ADMIN, this.player);
-			
 		}
 		
 	}
@@ -464,60 +327,73 @@ public class Board { //TODO Ajouter des teams pour colorer les noms meme s'il es
 			return right;
 		}
 
-//		private String first, second, third, lastSet;
-//		private int lastField;
-//		
-//		public BoardLine(String first) {
-//			this.first = first;
-//			lastSet = first;
-//			lastField = 0;
-//		}
-//		
-//		public void shrinkLastField(int toShrink) {
-//			switch (lastField) {
-//			case 0:
-//				first = first.substring(0, first.length() - toShrink);
-//				break;
-//			case 1:
-//				second = second.substring(0, second.length() - toShrink);
-//				break;
-//			case 2:
-//				third = third.substring(0, third.length() - toShrink);
-//				break;
-//			default:
-//				break;
-//			}
-//		}
-//		
-//		public void addText(String text) {
-//			if (first == null)
-//				first = text;
-//			else if (second == null)
-//				second = text;
-//			else if (third == null)
-//				third = text;
-//		}
-//		
-//		public String getFirst() {
-//			return first;
-//		}
-//		
-//		public String getSecond() {
-//			return second;
-//		}
-//		
-//		public String getThird() {
-//			return third;
-//		}
-//		
-//		public boolean hasThird() {
-//			return third != null;
-//		}
-//		
-//		public String getLastSet() {
-//			return lastSet;
-//		}
-		
 	}
+	
+//	public void showInvisible(BoardPlayer player) {
+//		Board board = player.getBoard();
+//		
+//		if (!board.hasInvisibleName())
+//			return;
+//		
+//		ScoreboardScore score = nmsBoard.getPlayerScoreForObjective(Methods.getRealName(player.getApiPlayer().getOfflinePlayer()), objective);
+//		
+//		score.setScore(0);
+//		
+//		PacketPlayOutScoreboardScore packet = new PacketPlayOutScoreboardScore(score, 0);
+//	}
+//
+//	public void setInvisibleName(boolean invisible) {
+//		if (invisible) {
+//			if (nmsBoard == null)
+//				nmsBoard = ((CraftScoreboard) scoreboard).getHandle();
+//			
+//			ScoreboardObjective objective = nmsBoard.getObjective("invisible");
+//			PlayerConnection connection = ((CraftPlayer) player.getApiPlayer().toPlayer()).getHandle().playerConnection;
+//			
+//			if (objective == null)
+//				nmsBoard.registerObjective("invisible", new ScoreboardBaseCriteria("Invisible"));
+//			
+//			connection.sendPacket(new PacketPlayOutScoreboardObjective(objective, 0));
+//			connection.sendPacket(new PacketPlayOutScoreboardDisplayObjective(2, objective));
+//			
+//			ScoreboardScore score = nmsBoard.getPlayerScoreForObjective(Methods.getRealName(player.getApiPlayer().getOfflinePlayer()), objective);
+//			
+//			score.setScore(0);
+//			
+//			PacketPlayOutScoreboardScore packet = new PacketPlayOutScoreboardScore(score, 0);
+//			
+//			for (Player online : Bukkit.getOnlinePlayers()) {
+//				if (OnimaPerm.ONIMAAPI_SEE_INVISIBLE.has(online))
+//					((CraftPlayer) online).getHandle().playerConnection.sendPacket(packet);
+//			}
+//		} else {
+//			if (nmsBoard == null)
+//				return;
+//		
+//			ScoreboardObjective objective = nmsBoard.getObjective("invisible");
+//			
+//			if (objective == null)
+//				return;
+//			
+//			PlayerConnection connection = ((CraftPlayer) player.getApiPlayer().toPlayer()).getHandle().playerConnection;
+//			
+//			connection.sendPacket(new PacketPlayOutScoreboardObjective(objective, 1));
+//			
+//			PacketPlayOutScoreboardScore packet = new PacketPlayOutScoreboardScore(
+//					nmsBoard.getPlayerScoreForObjective(Methods.getRealName(player.getApiPlayer().getOfflinePlayer()), objective), 0);
+//			
+//			for (Player online : Bukkit.getOnlinePlayers()) {
+//				if (OnimaPerm.ONIMAAPI_SEE_INVISIBLE.has(online))
+//					((CraftPlayer) online).getHandle().playerConnection.sendPacket(packet);
+//			}
+//
+//			nmsBoard.handleObjectiveRemoved(objective);
+//			nmsBoard = null;
+//		}
+//	}
+//	
+//	public boolean hasInvisibleName() {
+//		return nmsBoard != null;
+//	}
 	
 }

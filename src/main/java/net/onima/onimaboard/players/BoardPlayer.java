@@ -98,7 +98,7 @@ public class BoardPlayer extends OfflineBoardPlayer {
 	 * @param scoreboardTemplate - The template to display (ie: {@link OnimaBoardTemplate}).
 	 */
 	public void setBoard(ScoreboardTemplate scoreboardTemplate) {
-		board = new Board(Bukkit.getScoreboardManager().getNewScoreboard(), scoreboardTemplate, apiPlayer.toPlayer());
+		board = new Board(Bukkit.getScoreboardManager().getNewScoreboard(), scoreboardTemplate, this);
 	}
 	
 	

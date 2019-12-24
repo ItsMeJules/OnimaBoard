@@ -18,6 +18,9 @@ public class DefaultTemplate implements TabTemplate {
 		int x = 0, y = 0;
 		
 		for (Player online : Methods.getOnlinePlayers(player)) {
+			if (!player.canSee(online))
+				continue;
+			
 			FPlayer fOnline = FPlayer.getPlayer(online);
 			
 			tab.set(x, y, getDisplayColor(FPlayer.getPlayer(player), fOnline) + fOnline.getApiPlayer().getName());

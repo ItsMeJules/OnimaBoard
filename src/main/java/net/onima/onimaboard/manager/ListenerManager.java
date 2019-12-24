@@ -7,6 +7,7 @@ import net.onima.onimaboard.OnimaBoard;
 import net.onima.onimaboard.listeners.ArmorClassListener;
 import net.onima.onimaboard.listeners.FactionListeners;
 import net.onima.onimaboard.listeners.GameListener;
+import net.onima.onimaboard.listeners.InvisibilityListerner;
 import net.onima.onimaboard.listeners.TagDisguiseListener;
 
 /**
@@ -27,6 +28,7 @@ public class ListenerManager {
 		pm.registerEvents(new ArmorClassListener(), plugin);
 		pm.registerEvents(new GameListener(), plugin);
 		pm.registerEvents(new TagDisguiseListener(), plugin);
+		pm.registerEvents(new InvisibilityListerner(), plugin);
 	}
 
 }

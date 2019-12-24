@@ -1,33 +1,23 @@
 package net.onima.onimaboard.listeners;
 
-import java.util.stream.Collectors;
-
-import org.bukkit.Bukkit;
-import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 
 import net.onima.onimaapi.event.disguise.PlayerDisguiseEvent;
 import net.onima.onimaapi.event.disguise.PlayerUndisguiseEvent;
-import net.onima.onimaapi.rank.OnimaPerm;
-import net.onima.onimaboard.board.Nametag;
+import net.onima.onimaapi.utils.Methods;
 import net.onima.onimaboard.players.BoardPlayer;
 
 public class TagDisguiseListener implements Listener {
 	
 	@EventHandler
 	public void onDisguise(PlayerDisguiseEvent event) {
-		Player disguised = event.getPlayer();
-		
-		for (BoardPlayer player : BoardPlayer.getOnlineBoardPlayers()) {
-			if (OnimaPerm.ONIMAAPI_DISGUISE_COMMAND_LIST.has(player.getApiPlayer().toPlayer()))
-				player.getBoard().setNameTag(Nametag.DISGUISED_ADMIN, disguised);
-		}
+		BoardPlayer.getPlayer(event.getPlayer()).getBoard().initNametag(Methods.getOnlinePlayers(null));
 	}
 	
 	@EventHandler
 	public void onUndisguise(PlayerUndisguiseEvent event) {
-		BoardPlayer.getPlayer(event.getPlayer()).getBoard().initNametag(Bukkit.getOnlinePlayers().stream().filter(player -> OnimaPerm.ONIMAAPI_DISGUISE_COMMAND_LIST.has(player)).collect(Collectors.toList()));
+		BoardPlayer.getPlayer(event.getPlayer()).getBoard().initNametag(Methods.getOnlinePlayers(null));
 	}
 	
 
