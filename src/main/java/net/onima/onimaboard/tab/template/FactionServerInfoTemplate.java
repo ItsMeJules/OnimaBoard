@@ -26,6 +26,7 @@ import net.onima.onimafaction.players.FPlayer;
 import net.onima.onimafaction.timed.event.BattleRoyale;
 import net.onima.onimafaction.timed.event.BattleRoyale.Phase;
 import net.onima.onimagames.game.Game;
+import net.onima.onimagames.game.GameType;
 
 public class FactionServerInfoTemplate implements TabTemplate {
 	
@@ -73,8 +74,10 @@ public class FactionServerInfoTemplate implements TabTemplate {
 		Game startedGame = Game.getStartedGame();
 		
 		if (startedGame != null) {
+			GameType type = startedGame.getGameType();
+			
 			tab.set(0, 14, "§dEvent en cours :");
-			tab.set(0, 15, startedGame.getGameType().getName() + ' ' + startedGame.getName());
+			tab.set(0, 15, type.getColor() + type.getName() + ' ' + startedGame.getName());
 			
 			if (startedGame.getLocation() != null) {
 				Location gameLoc = startedGame.getLocation();
