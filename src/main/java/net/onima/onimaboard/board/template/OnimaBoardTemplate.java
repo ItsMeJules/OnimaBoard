@@ -138,17 +138,17 @@ public class OnimaBoardTemplate implements ScoreboardTemplate {
 		
 		if ((game = Game.getStartedGame()) != null) {
 			if (game instanceof Koth)
-				board.add((game instanceof Citadel ? "§5" : "§9") + game.getName() + " §6: §c" + LongTime.setHMSFormatOnlySeconds(((Koth) game).getCapTimeLeft()));
+				board.add(game.getGameType().getColor() + (game instanceof Citadel ? "Citadel" : game.getName()) + " §6: §c" + LongTime.setHMSFormatOnlySeconds(((Koth) game).getCapTimeLeft()));
 			else if (game instanceof DTC) { 
 				DTC dtc = (DTC) game;
-				board.add("§eDTC §6: §c" + dtc.getPoints() + '/' + dtc.getInitialPoints());
+				board.add(game.getGameType().getColor() + "DTC §6: §c" + dtc.getPoints() + '/' + dtc.getInitialPoints());
 			} else if (game instanceof Conquest) {
 				Conquest conquest = (Conquest) game;
 				
-				board.add("§3" + game.getName() + " §6:");
-				board.add("      §7• " + LongTime.setHMSFormat(conquest.getZone(ConquestType.MAIN).getCapTimeLeft()));
-				board.add("  §7• " + LongTime.setHMSFormat(conquest.getZone(ConquestType.BLUE).getCapTimeLeft()) + " §7• " + LongTime.setHMSFormat(conquest.getZone(ConquestType.GREEN).getCapTimeLeft()));
-				board.add("  §7• " + LongTime.setHMSFormat(conquest.getZone(ConquestType.RED).getCapTimeLeft()) + " §7• " + LongTime.setHMSFormat(conquest.getZone(ConquestType.YELLOW).getCapTimeLeft()));
+				board.add(game.getGameType().getColor() + "Conquest §7(" + conquest.getPointsToWin() + " points) §6:");
+				board.add("          §d• " + LongTime.setHMSFormatOnlySeconds(conquest.getZone(ConquestType.MAIN).getCapTimeLeft()));
+				board.add("      §9• " + LongTime.setHMSFormatOnlySeconds(conquest.getZone(ConquestType.BLUE).getCapTimeLeft()) + " §2• " + LongTime.setHMSFormatOnlySeconds(conquest.getZone(ConquestType.GREEN).getCapTimeLeft()));
+				board.add("      §c• " + LongTime.setHMSFormatOnlySeconds(conquest.getZone(ConquestType.RED).getCapTimeLeft()) + " §e• " + LongTime.setHMSFormatOnlySeconds(conquest.getZone(ConquestType.YELLOW).getCapTimeLeft()));
 				
 				for (Entry<String, Short> entry : Methods.getTop(conquest.getCappingFactions(), 3).collect(Collectors.toList()))
 					board.add("§d§l" + entry.getKey() + " §7» " + entry.getValue());

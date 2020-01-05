@@ -1,8 +1,10 @@
 package net.onima.onimaboard.listeners;
 
+import org.bukkit.Bukkit;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 
+import net.onima.onimaboard.OnimaBoard;
 import net.onima.onimaboard.players.BoardPlayer;
 import net.onima.onimaboard.tab.Tab;
 import net.onima.onimaboard.tab.template.FactionServerInfoTemplate;
@@ -16,17 +18,17 @@ public class GameListener implements Listener {
 	
 	@EventHandler
 	public void onGameStop(GameStopEvent event) {
-		clearLastLines(0);
+		Bukkit.getScheduler().runTask(OnimaBoard.getInstance(), () -> clearLastLines(0));
 	}
 	
 	@EventHandler
 	public void onCapableWin(CapableWinEvent event) {
-		clearLastLines(0);
+		Bukkit.getScheduler().runTask(OnimaBoard.getInstance(), () -> clearLastLines(0));
 	}
 	
 	@EventHandler
 	public void onDTCWin(DTCWinEvent event) {
-		clearLastLines(0);
+		Bukkit.getScheduler().runTask(OnimaBoard.getInstance(), () -> clearLastLines(0));
 	}
 	
 	@EventHandler
