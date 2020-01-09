@@ -18,7 +18,7 @@ public class SidebarCommand implements CommandExecutor {
 			return false;
 		}
 		
-		if (OnimaPerm.ONIMABOARD_SIDEBAR_COMMAND.has(sender)) {
+		if (!OnimaPerm.ONIMABOARD_SIDEBAR_COMMAND.has(sender)) {
 			sender.sendMessage(OnimaAPI.UNKNOWN_COMMAND);
 			return false;
 		}
