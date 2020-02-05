@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
-import java.util.Objects;
 
 import org.apache.commons.lang.StringUtils;
 import org.bukkit.ChatColor;
@@ -122,7 +121,7 @@ public class Board {
 			String right = text.substring(16, text.length());
 			
 			if (left.endsWith("§")) {
-				left = left.substring(0, left.length()-1);
+				left = left.substring(0, left.length() - 1);
 				right = "§" + right;
 			}
 			
@@ -130,6 +129,7 @@ public class Board {
 			right = lastColors + right;
 			line = new BoardLine(left, StringUtils.left(right, 16));
 		}
+		
 		lines.add(line);
 	}
 	
@@ -137,8 +137,9 @@ public class Board {
 		lines.clear();
 	}
 	
-	public void remove(int index) { //TODO essayer de changer avec juste des ints (pas d'opératins lourdes).
+	public void remove(int index) {
 		String name = getNameForIndex(index);
+		
 		scoreboard.resetScores(name);
 		getOrCreateTeam(ChatColor.stripColor(StringUtils.left(tag, 14)) + index, index).unregister();
 	}
@@ -185,7 +186,7 @@ public class Board {
 	private Team getOrCreateTeam(String team, int i) {
 		Team sTeam = scoreboard.getTeam(team);
 		
-		if (Objects.isNull(sTeam)) {
+		if (!scoreboard.getTeams().contains(sTeam)) {
 			sTeam = scoreboard.registerNewTeam(team);
 			sTeam.addEntry(getNameForIndex(i));
 		}

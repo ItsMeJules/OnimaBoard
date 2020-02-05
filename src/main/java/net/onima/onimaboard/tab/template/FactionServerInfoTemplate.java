@@ -82,7 +82,7 @@ public class FactionServerInfoTemplate implements TabTemplate {
 			if (startedGame.getLocation() != null) {
 				Location gameLoc = startedGame.getLocation();
 				tab.set(0, 16, "§7Location : ");
-				tab.set(0, 17, "§7" + gameLoc.getBlockX() + ' ' + gameLoc.getBlockY() + ' ' + gameLoc.getBlockZ());
+				tab.set(0, 17, "§6" + gameLoc.getBlockX() + ' ' + gameLoc.getBlockY() + ' ' + gameLoc.getBlockZ());
 				tab.set(0, 18, "§7Commencé depuis");
 				tab.set(0, 19, LongTime.setHMSFormat(System.currentTimeMillis() - startedGame.getStartedTime()));
 			} else {
@@ -103,7 +103,7 @@ public class FactionServerInfoTemplate implements TabTemplate {
 				if (nextGame.getLocation() != null) {
 					Location gameLoc = nextGame.getLocation();
 					tab.set(0, 16, "§7Location : ");
-					tab.set(0, 17, "§7" + gameLoc.getBlockX() + ' ' + gameLoc.getBlockY() + ' ' + gameLoc.getBlockZ());
+					tab.set(0, 17, "§6" + gameLoc.getBlockX() + ' ' + gameLoc.getBlockY() + ' ' + gameLoc.getBlockZ());
 					tab.set(0, 18, "§7commence dans");
 					tab.set(0, 19, LongTime.setDHMSFormat(nextGame.getStartTimeLeft()));
 				} else {

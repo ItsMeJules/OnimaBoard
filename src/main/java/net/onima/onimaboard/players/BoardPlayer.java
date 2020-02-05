@@ -106,6 +106,7 @@ public class BoardPlayer extends OfflineBoardPlayer {
 	public void toggleBoard(boolean toggle) {
 		super.toggleBoard(toggle);
 		board.toggle(toggle);
+		
 	}
 	
 	@Override

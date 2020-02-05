@@ -28,7 +28,7 @@ public class OfflineBoardPlayer implements NoSQLSaver {
 	
 	private OfflineAPIPlayer offlineApiPlayer;
 	private OfflineFPlayer offlineFPlayer;
-	private boolean boardToggled, staffBoard;
+	private boolean boardToggled, staffBoard, firstJoined;
 	
 	{
 		boardToggled = true;
@@ -41,7 +41,12 @@ public class OfflineBoardPlayer implements NoSQLSaver {
 		
 		if (this instanceof BoardPlayer)
 			transferInstance(offlineApiPlayer.getUUID());
+		
+		OfflineBoardPlayer ofb = offlinePlayers.get(offlineApiPlayer.getUUID());
 			
+		if (OnimaAPI.getSavers().contains(ofb))
+			OnimaAPI.getSavers().remove(ofb);
+		
 		offlinePlayers.put(offlineApiPlayer.getUUID(), this);
 		OnimaAPI.getSavers().add(this);
 	}
@@ -78,6 +83,14 @@ public class OfflineBoardPlayer implements NoSQLSaver {
 	
 	public boolean hasStaffBoard() {
 		return staffBoard;
+	}
+	
+	public void setFirstJoin(boolean firstJoined) {
+		this.firstJoined = firstJoined;
+	}
+	
+	public boolean isFirstJoin() {
+		return firstJoined;
 	}
 	
 	@Override

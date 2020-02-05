@@ -32,7 +32,6 @@ public class OnimaBoard extends JavaPlugin {
 	public void registerManager() {
 		ScoreboardEntryTask.init(this);
 		TabEntryTask.init(this);
-		
 		InvisibilityHandler.hook(this);
 		
 		new ListenerManager(this).registerListener();

@@ -3,6 +3,7 @@ package net.onima.onimaboard.board.template;
 import java.util.Map.Entry;
 import java.util.stream.Collectors;
 
+import org.apache.commons.lang.StringUtils;
 import org.bukkit.GameMode;
 
 import net.onima.onimaapi.cooldown.utils.Cooldown;
@@ -123,10 +124,10 @@ public class OnimaBoardTemplate implements ScoreboardTemplate {
 				
 			Cooldown cooldown = Cooldown.getCooldown(id);
 			String line = cooldown.scoreboardDisplay(apiPlayer.getTimeLeft(cooldown));
-				
+
 			if (line != null) {
 				if (id == 9) {
-					board.add(line.replace("%mark-number%", String.valueOf(fPlayer.getArcherTag())));
+					board.add(StringUtils.replace(line, "%mark-number%", String.valueOf(fPlayer.getArcherTag())));
 					continue;
 				}
 					
